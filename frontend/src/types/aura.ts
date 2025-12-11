@@ -1,0 +1,207 @@
+/**
+ * AURA DATA CONTRACT
+ * 
+ * Type definitions for the Backend ↔ Frontend communication.
+ * Based on the actual Pydantic models from the backend.
+ */
+
+// ============================================
+// EMOTION ENGINE (27D Physics Model)
+// ============================================
+
+export interface EmotionState {
+  // Core 8 (Plutchik) for Radar Visualization
+  joy: number;
+  trust: number;
+  fear: number;
+  surprise: number;
+  sadness: number;
+  disgust: number;
+  anger: number;
+  anticipation: number;
+
+  // Extended dimensions (Social, Cognitive, Aesthetic)
+  love?: number;
+  submission?: number;
+  awe?: number;
+  disapproval?: number;
+  remorse?: number;
+  contempt?: number;
+  aggressiveness?: number;
+  optimism?: number;
+  
+  // Aesthetic emotions
+  beauty?: number;
+  serenity?: number;
+  
+  // Cognitive emotions
+  curiosity?: number;
+  confusion?: number;
+  interest?: number;
+  boredom?: number;
+  
+  // Meta-State (Derived from 27D)
+  current_state: string; // e.g., "Optimism", "Anxiety", "Curiosity"
+  dominant: string;      // Most prominent emotion
+  valence: number;       // Overall positivity [-1, 1]
+  arousal: number;       // Activation level [0, 1]
+  entropy: number;       // System chaos/complexity
+  
+  // Physics Metrics
+  inertia?: number;      // Resistance to change
+  momentum?: number;     // Current velocity
+}
+
+export interface EmotionVector {
+  [key: string]: number;
+}
+
+// ============================================
+// COGNITIVE LAYERS (L1/L2/L3 Architecture)
+// ============================================
+
+export interface CognitiveTrace {
+  layer: 'L1' | 'L2' | 'L3' | 'Dream' | 'Orchestrator';
+  status: 'idle' | 'processing' | 'streaming' | 'complete';
+  model: string;         // e.g., "mistralai/mistral-7b-instruct"
+  latency_ms: number;
+  
+  // Optional metadata
+  tokens_used?: number;
+  temperature?: number;
+  confidence?: number;
+}
+
+// ============================================
+// MEMORY SYSTEM
+// ============================================
+
+export interface Memory {
+  memory_id: string;
+  content: string;
+  timestamp: string;
+  emotional_signature: EmotionVector;
+  importance: number;
+  learned_from: boolean;
+  tags?: string[];
+  
+  // Vector search metadata
+  similarity?: number;
+}
+
+// ============================================
+// LEARNING ENGINE
+// ============================================
+
+export interface Rule {
+  rule_id: string;
+  condition: string;
+  action: string;
+  rationale: string;
+  domain: string;
+  confidence: number;
+  application_count: number;
+  success_count: number;
+  last_used?: string;
+}
+
+export interface Skill {
+  skill_id: string;
+  name: string;
+  domain: string;
+  mastery_level: number;
+  sub_skills: string[];
+}
+
+// ============================================
+// GOAL & IDENTITY
+// ============================================
+
+export interface Goal {
+  goal_id: string;
+  name: string;
+  description: string;
+  status: 'pending' | 'active' | 'completed' | 'cancelled';
+  priority: number;
+  emotional_alignment: EmotionVector;
+  created_at: string;
+  parent_goal_id?: string;
+}
+
+export interface IdentityContext {
+  narrative: string;
+  values: { [key: string]: number };
+  preferences: { [key: string]: any };
+  version: string;
+}
+
+// ============================================
+// REFLECTION
+// ============================================
+
+export interface Reflection {
+  reflection_id: string;
+  timestamp: string;
+  summary: string;
+  insights: string[];
+  emotional_trajectory_summary: any;
+  learning_patterns_identified: string[];
+  shareable: boolean;
+}
+
+// ============================================
+// SYSTEM STATUS (Real-Time State)
+// ============================================
+
+export interface AuraStatus {
+  online: boolean;
+  emotion: EmotionState;
+  cognitive: CognitiveTrace;
+  last_memory: Memory | null;
+  active_goals: Goal[];
+  identity_snapshot: string; // Short narrative
+  
+  // System metrics
+  uptime_seconds?: number;
+  total_interactions?: number;
+  database_connected?: boolean;
+}
+
+// ============================================
+// CHAT INTERFACE
+// ============================================
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'aura' | 'system';
+  content: string;
+  timestamp: string;
+  
+  // Metadata
+  emotional_state?: EmotionState;
+  cognitive_layer?: 'L1' | 'L2' | 'L3';
+  confidence?: number;
+  tokens?: number;
+}
+
+export interface ChatSession {
+  session_id: string;
+  messages: ChatMessage[];
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================
+// WEBSOCKET EVENTS
+// ============================================
+
+export type WebSocketEvent =
+  | { type: 'emotion_update'; data: EmotionState }
+  | { type: 'cognitive_update'; data: CognitiveTrace }
+  | { type: 'message'; data: ChatMessage }
+  | { type: 'memory_created'; data: Memory }
+  | { type: 'goal_created'; data: Goal }
+  | { type: 'learning_update'; data: { rule?: Rule; skill?: Skill } }
+  | { type: 'system_status'; data: AuraStatus }
+  | { type: 'error'; data: { message: string } };
+

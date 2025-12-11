@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:v2.0.4
+    container_name: aura-surrealdb
+   # Use rocksdb (file storage) pointing to the mapped volume
+    command: start --log trace --user root --pass root rocksdb:/data/aura.db
+    ports:
+      - "8000:8000"
+    volumes:
+      - surrealdb_data:/data
+      - ./scripts:/scripts
+    environment:
+      - SURREAL_USER=root
+      - SURREAL_PASS=root
+      # DELETED: - SURREAL_PATH=memory
+    networks:
+      - aura-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aura-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    environment:
+      - SURREAL_URL=ws://surrealdb:8000/rpc
+      - SURREAL_USER=root
+      - SURREAL_PASS=root
+      - SURREAL_NS=aura
+      - SURREAL_DB=main
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=development
+    depends_on:
+      surrealdb:
+        condition: service_healthy
+    networks:
+      - aura-network
+    command: uvicorn aura.main:app --host 0.0.0.0 --port 8080 --reload
+
+volumes:
+  surrealdb_data:
+    driver: local
+
+networks:
+  aura-network:
+    driver: bridge
+

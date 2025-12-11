@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # SurrealDB - Graph + Vector Database
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: aura-database
+    ports:
+      - "8000:8000"
+    volumes:
+      - surrealdb_data:/data
+    command: start --log debug --user root --pass root file:///data/aura.db
+    networks:
+      - aura-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aura Backend - FastAPI + Cognitive Engines
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aura-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - SURREAL_URL=ws://surrealdb:8000/rpc
+      - SURREAL_USER=root
+      - SURREAL_PASS=root
+      - SURREAL_NS=aura
+      - SURREAL_DB=main
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    depends_on:
+      surrealdb:
+        condition: service_healthy
+    networks:
+      - aura-network
+    command: uvicorn aura.main:app --host 0.0.0.0 --port 8080 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aura Frontend - Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+        NEXT_PUBLIC_SOCKET_URL: ws://localhost:8080/ws
+    container_name: aura-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8080
+      - NEXT_PUBLIC_SOCKET_URL=ws://backend:8080/ws
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - aura-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  surrealdb_data:
+    driver: local
+
+networks:
+  aura-network:
+    driver: bridge
+

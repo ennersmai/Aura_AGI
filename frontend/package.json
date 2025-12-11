@@ -1,0 +1,52 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_OPTIONS='--require ./src/utils/patch-util-extend.js' next dev --turbopack",
+    "build": "NODE_OPTIONS='--require ./src/utils/patch-util-extend.js' next build",
+    "start": "NODE_OPTIONS='--require ./src/utils/patch-util-extend.js' next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.7",
+    "@mui/material": "^6.4.7",
+    "@reduxjs/toolkit": "^2.6.1",
+    "axios": "^1.8.3",
+    "chart.js": "^4.4.8",
+    "clsx": "^2.1.1",
+    "d3": "^7.9.0",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.26",
+    "lucide-react": "^0.560.0",
+    "next": "15.2.2",
+    "react": "^19.0.0",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "react-redux": "^9.2.0",
+    "recharts": "^2.15.4",
+    "redux": "^5.0.1",
+    "redux-persist": "^6.0.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
+    "socket.io-client": "^4.8.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.2",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "webpack": "^5.98.0"
+  }
+}
